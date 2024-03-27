@@ -1,0 +1,557 @@
+// ==================================================================================================== 
+//  Fetch API Modularization (JavaScript):
+// ==================================================================================================== 
+// API service module
+const ApiService = {
+  async fetchData(url) {
+      try {
+          const response = await fetch(url);
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return await response.json();
+      } catch (error) {
+          console.error('Error fetching data:', error);
+          throw error;
+      }
+  }
+};
+
+export default ApiService;
+
+/**  Usage:-
+ 
+import ApiService from './ApiService';
+
+async function getData() {
+  try {
+      const data = await ApiService.fetchData('https://api.example.com/data');
+      // Process fetched data
+  } catch (error) {
+      // Handle error
+  }
+}
+
+*/
+
+
+
+// ==================================================================================================== 
+//  Modal Component (React):
+// ==================================================================================================== 
+import React from 'react';
+
+function Modal({ isOpen, onClose, children }) {
+    return (
+        isOpen && (
+            <div className="modal">
+                <div className="modal-content">
+                    <span className="close" onClick={onClose}>&times;</span>
+                    {children}
+                </div>
+            </div>
+        )
+    );
+}
+
+export default Modal;
+
+/**  Usage:-
+ 
+<Modal isOpen={true} onClose={handleClose}>Modal Content</Modal>
+
+*/
+
+
+
+// ==================================================================================================== 
+//  useWindowSize: Utility to track the size of the browser window.  
+// ==================================================================================================== 
+import { useState, useEffect } from 'react';
+
+export const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return windowSize;
+};
+
+/**  Usage:-
+ 
+const { width, height } = useWindowSize(); 
+
+*/
+
+
+
+// ==================================================================================================== //
+// useTimeout: Utility to execute a function after a specified delay. 
+// ==================================================================================================== //
+import { useEffect } from 'react';
+
+export const useTimeout = (callback, delay) => {
+  useEffect(() => {
+    const timer = setTimeout(callback, delay);
+    return () => clearTimeout(timer);
+  }, [callback, delay]);
+};
+
+/**  Usage:-
+ 
+useTimeout(() => {
+  // Function to execute after delay
+}, 1000); // Delay in milliseconds
+
+*/
+
+
+
+// ==================================================================================================== //
+// useDocumentTitle: Utility to dynamically set the document title.
+// ==================================================================================================== //
+import { useEffect } from 'react';
+
+export const useDocumentTitle = (title) => {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+};
+
+/**  Usage:-
+ 
+useDocumentTitle('New Page Title');
+
+*/
+
+
+
+// ==================================================================================================== //
+// useScrollToTop: Utility to scroll to the top of the page.
+// ==================================================================================================== //
+import { useEffect } from 'react';
+
+export const useDocumentTitle = (title) => {
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+};
+
+/**  Usage:-
+ 
+useScrollToTop();
+
+*/
+
+
+
+// ==================================================================================================== //
+// useOnlineStatus: Utility to track online/offline status.
+// ==================================================================================================== //
+import { useState, useEffect } from 'react';
+
+export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
+
+/**  Usage:-
+ 
+const onlineStatus = useOnlineStatus();
+
+*/
+
+
+
+// ==================================================================================================== //
+// useMediaQuery: Utility to track the state of a CSS media query.
+// ==================================================================================================== //
+import { useState, useEffect } from 'react';
+
+export const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    const handleChange = () => {
+      setMatches(mediaQuery.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+    setMatches(mediaQuery.matches);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [query]);
+
+  return matches;
+};
+
+/**  Usage:-
+ 
+const isMobile = useMediaQuery('(max-width: 768px)');
+
+*/
+
+
+
+// ==================================================================================================== //
+// useOnClickOutside: Utility to detect clicks outside of a specified element.
+// ==================================================================================================== //
+import { useEffect } from 'react';
+
+export const useOnClickOutside = (ref, handler) => {
+  useEffect(() => {
+    const listener = event => {
+      if (!ref.current || ref.current.contains(event.target)) {
+        return;
+      }
+      handler(event);
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler]);
+};
+
+/**  Usage:-
+  
+ const ref = useRef();
+useOnClickOutside(ref, () => {
+  // Handle click outside
+});
+
+*/
+
+
+
+// ==================================================================================================== //
+// useInterval: Utility to execute a function repeatedly at a specified interval.
+// ==================================================================================================== //
+import { useEffect, useRef } from 'react';
+
+export const useInterval = (callback, delay) => {
+  const savedCallback = useRef();
+
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    const tick = () => {
+      savedCallback.current();
+    };
+
+    if (delay !== null) {
+      const id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+};
+
+/**  Usage:-
+ 
+ useInterval(() => {
+  // Function to execute repeatedly
+}, 1000); // Interval in milliseconds
+
+*/
+
+
+
+// ==================================================================================================== //
+// useFetch: Utility to perform fetch requests.
+// ==================================================================================================== //
+import { useState, useEffect } from 'react';
+
+export const useFetch = (url) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url);
+        const jsonData = await response.json();
+        setData(jsonData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading };
+};
+
+/**  Usage:-
+ 
+ const { data, loading } = useFetch('https://api.example.com/data');
+
+*/
+
+
+
+// ==================================================================================================== //
+// useDebounce: Utility to debounce a function.
+// ==================================================================================================== //
+import { useState, useEffect } from 'react';
+
+export const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
+/**  Usage:-
+ 
+ const debouncedValue = useDebounce(inputValue, 500);
+
+*/
+
+
+
+
+
+
+// = = = = = = = = = = = = = = J A V A S C R I P T = = = = = = = = = = = = = = //
+
+
+// ==================================================================================================== //
+// Intersection observer to lazy load elements
+// ==================================================================================================== //
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Load content or trigger action when element is in view
+    }
+  });
+});
+
+const target = document.querySelector('.target-element');
+observer.observe(target);
+
+
+
+// ==================================================================================================== //
+// Copy to Clipboard (JavaScript):
+// ==================================================================================================== //
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => console.log('Text copied to clipboard'))
+    .catch(error => console.error('Error copying text:', error));
+}
+
+// Example usage:
+// copyToClipboard('Hello, world!');
+
+
+
+// ==================================================================================================== //
+// Toggle Password Visibility (JavaScript):
+// ==================================================================================================== //
+function togglePasswordVisibility(inputId, toggleId) {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+
+  toggle.addEventListener('click', () => {
+      const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+      input.setAttribute('type', type);
+      toggle.textContent = type === 'password' ? 'Show' : 'Hide';
+  });
+}
+
+// Example usage:
+// togglePasswordVisibility('passwordInput', 'togglePassword');
+
+
+
+// ==================================================================================================== //
+// Detect Internet Connection (JavaScript):
+// ==================================================================================================== //
+function isOnline() {
+  return navigator.onLine;
+}
+
+// Example usage:
+// const onlineStatus = isOnline();
+// console.log(onlineStatus); // Output: true or false
+
+
+
+// ==================================================================================================== //
+// Password Strength Validation (JavaScript):
+// ==================================================================================================== //
+function validatePassword(password) {
+  // Example: Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one digit
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+  return regex.test(password);
+}
+
+// Example usage:
+// const isValidPassword = validatePassword('Password123');
+// console.log(isValidPassword); // Output: true or false
+
+
+
+// ==================================================================================================== //
+// Random Number Generator (JavaScript):
+// ==================================================================================================== //
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Example usage:
+// const randomNumber = getRandomNumber(1, 100);
+// console.log(randomNumber); // Output: Random number between 1 and 100
+
+
+
+
+// ==================================================================================================== //
+// Date Formatting (JavaScript):
+// ==================================================================================================== //
+// Format date as "YYYY-MM-DD"
+function formatDate(date) {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Example usage:
+// const formattedDate = formatDate(new Date());
+// console.log(formattedDate); // Output: "2023-12-31"
+
+
+
+// ==================================================================================================== //
+// Scroll to Top Button (JavaScript):
+// ==================================================================================================== //
+// Scroll to top button functionality
+function scrollToTop() {
+  window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+  });
+}
+
+// Example usage:
+// <button onclick="scrollToTop()">Scroll to Top</button>
+
+
+
+// ==================================================================================================== //
+// URL Parameters Parsing (JavaScript):
+// ==================================================================================================== //
+// Parse URL parameters
+function getUrlParams() {
+  const params = {};
+  const urlParams = new URLSearchParams(window.location.search);
+  for (const [key, value] of urlParams.entries()) {
+      params[key] = value;
+  }
+  return params;
+}
+
+// Example usage:
+// Assuming URL: https://example.com/page?name=John&age=30
+// const params = getUrlParams();
+// console.log(params.name); // Output: "John"
+// console.log(params.age); // Output: "30"
+
+
+
+
+
+
+
+
+// ==================================================================================================== //
+// Responsive Grid Layout (CSS):
+// ==================================================================================================== //
+.container {
+  display: grid;
+  grid - template - columns: repeat(auto - fill, minmax(250px, 1fr));
+  grid - gap: 20px;
+}
+
+.item {
+  /* Styles for grid items */
+}
+
+
+
+
+// ==================================================================================================== //
+// Smooth Fade In/Out (CSS):
+// ==================================================================================================== //
+.fade-in {
+  animation: fadeIn ease 1s;
+  opacity: 0;
+}
+
+.fade-out {
+  animation: fadeOut ease 1s;
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
